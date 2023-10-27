@@ -39,6 +39,10 @@ function createService() {
         case 0:
           // 本系统采用 code === 0 来表示没有业务错误
           return apiData
+        case 2002:
+          return apiData
+        case 2000:
+          return apiData
         case 401:
           // Token 过期时
           return logout()
@@ -103,7 +107,7 @@ function createRequest(service: AxiosInstance) {
     const defaultConfig = {
       headers: {
         // 携带 Token
-        Authorization: token ? `Bearer ${token}` : undefined,
+        Authorization: token ? `${token}` : undefined,
         "Content-Type": "application/json"
       },
       timeout: 5000,

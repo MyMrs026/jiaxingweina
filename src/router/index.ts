@@ -247,6 +247,62 @@ export const constantRoutes: RouteRecordRaw[] = [
         }
       }
     ]
+  },
+  {
+    path: "/user",
+    name: "User",
+    component: Layouts,
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/user/index.vue"),
+        name: "user",
+        meta: {
+          title: "用户管理",
+          svgIcon: "menu"
+        }
+      }
+    ]
+  },
+  {
+    path: "/training",
+    name: "Training",
+    component: Layouts,
+    redirect: "/training/project",
+    meta: {
+      title: "培训管理",
+      elIcon: "Menu",
+      alwaysShow: true
+    },
+    children: [
+      {
+        path: "application",
+        component: () => import("@/views/training/application/index.vue"),
+        name: "application",
+        meta: {
+          title: "培训申请",
+          keepAlive: true
+        }
+      },
+      {
+        path: "project",
+        component: () => import("@/views/training/project/index.vue"),
+        name: "project",
+        meta: {
+          title: "培训项目",
+          keepAlive: true
+        }
+      },
+      {
+        path: "result",
+        component: () => import("@/views/training/result/index.vue"),
+        name: "result",
+        meta: {
+          title: "培训结果",
+          keepAlive: true
+        }
+      }
+    ]
   }
 ]
 
