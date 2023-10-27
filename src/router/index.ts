@@ -287,6 +287,37 @@ export const constantRoutes: RouteRecordRaw[] = [
         }
       }
     ]
+  },
+  {
+    path: "/information",
+    name: "Information",
+    component: Layouts,
+    redirect: "/information/labinform",
+    meta: {
+      title: "信息管理",
+      elIcon: "Menu",
+      alwaysShow: true
+    },
+    children: [
+      {
+        path: "labinform",
+        component: () => import("@/views/information/labinform/index.vue"),
+        name: "labinform",
+        meta: {
+          title: "实验室信息",
+          keepAlive: true
+        }
+      },
+      {
+        path: "notice",
+        component: () => import("@/views/information/notice/index.vue"),
+        name: "notice",
+        meta: {
+          title: "公告信息",
+          keepAlive: true
+        }
+      }
+    ]
   }
 ]
 
