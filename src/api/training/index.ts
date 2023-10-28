@@ -2,13 +2,7 @@ import { request } from "@/utils/service"
 import type * as TrainingProject from "./types/training"
 import type * as TrainingApplication from "./types/application"
 import type * as TrainingResult from "./types/result"
-
-interface PageParams {
-  /** 当前页码 */
-  cur: number
-  /** 查询条数 */
-  size: number
-}
+import { getUserById } from "../user"
 
 //#region 培训项目
 /** 增 */
@@ -45,6 +39,25 @@ export function getTrainingListPage(params: PageParams) {
     params
   })
 }
+
+export function getTrainingList() {
+  return request<TrainingProject.GetTrainingList>({
+    url: "training/list",
+    method: "get"
+  })
+}
+
+export async function getTrainingById(id: string) {
+  const response = await request<TrainingProject.GetTrainingList>({
+    url: "training/list",
+    method: "get"
+  })
+  for (const item of response.data) {
+    if (item.trainingId == id) {
+      return item
+    }
+  }
+}
 //#endregion
 
 //#region 培训申请
@@ -75,13 +88,28 @@ export function updateTrainingApplication(data: TrainingApplication.UpdateTraini
 }
 
 /** 查 */
-export function getTrainingApplicationListPage(params: PageParams) {
-  return request<TrainingApplication.GetTrainingApplicationList>({
+export async function getTrainingApplicationListPage(params: PageParams) {
+  const applications: TrainingApplication.TrainingApplicationEntity[] = []
+  const response = await request<TrainingApplication.GetTrainingApplicationList>({
     url: "training/application/page",
     method: "get",
     params
   })
+
+  for (const item of response.data) {
+    const userResponse = await getUserById(item.userId)
+    const user = userResponse.data
+    const training = await getTrainingById(item.trainingId)
+
+    applications.push({
+      ...item,
+      username: user.username,
+      trainingName: training?.trainingName || ""
+    })
+  }
+  return applications
 }
+
 //#endregion
 
 //#region 培训结果

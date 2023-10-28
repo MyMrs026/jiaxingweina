@@ -21,4 +21,14 @@ export interface TrainingApplication {
   createTime: string
 }
 
-export type GetTrainingApplicationList = ApiResponseData<TrainingApplication[]>
+export interface TrainingApplicationEntity {
+  trainingApplicationId: string
+  userId: string
+  username: string
+  trainingId: string
+  trainingName: string
+  applicationStatus: number
+  createTime: string
+}
+
+export type GetTrainingApplicationList = ApiResponseData<TrainingApplicationEntity[]>
