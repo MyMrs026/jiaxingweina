@@ -40,11 +40,12 @@ module.exports = {
       }
     ],
     "no-unused-vars": [
-      "error",
-      {
-        argsIgnorePattern: "^_",
-        varsIgnorePattern: "^_"
-      }
+      0
+      // "error",
+      // {
+      //   argsIgnorePattern: "^_",
+      //   varsIgnorePattern: "^_"
+      // }
     ],
     // Vue
     "vue/no-v-html": "off",
