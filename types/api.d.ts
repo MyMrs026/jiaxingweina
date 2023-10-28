@@ -4,3 +4,13 @@ interface ApiResponseData<T> {
   data: T
   message: string
 }
+
+/**
+ * 分页参数
+ */
+interface PageParams {
+  /** 当前页码 */
+  cur: number
+  /** 查询条数 */
+  size: number
+}

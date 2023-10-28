@@ -249,6 +249,22 @@ export const constantRoutes: RouteRecordRaw[] = [
     ]
   },
   {
+    path: "/user",
+    name: "User",
+    component: Layouts,
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/user/index.vue"),
+        name: "user",
+        meta: {
+          title: "用户管理",
+          svgIcon: "menu"
+        }
+      }
+    ]
+  },
+  {
     path: "/training",
     name: "Training",
     component: Layouts,
@@ -283,6 +299,37 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "result",
         meta: {
           title: "培训结果",
+          keepAlive: true
+        }
+      }
+    ]
+  },
+  {
+    path: "/information",
+    name: "Information",
+    component: Layouts,
+    redirect: "/information/labinform",
+    meta: {
+      title: "信息管理",
+      elIcon: "Menu",
+      alwaysShow: true
+    },
+    children: [
+      {
+        path: "labinform",
+        component: () => import("@/views/information/labinform/index.vue"),
+        name: "labinform",
+        meta: {
+          title: "实验室信息",
+          keepAlive: true
+        }
+      },
+      {
+        path: "notice",
+        component: () => import("@/views/information/notice/index.vue"),
+        name: "notice",
+        meta: {
+          title: "公告信息",
           keepAlive: true
         }
       }

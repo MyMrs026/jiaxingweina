@@ -1,23 +1,14 @@
-<script lang="ts" setup>
-import { onMounted, reactive, ref, watch } from "vue"
-import {
-  addTrainingApplication,
-  deleteTrainingApplication,
-  updateTrainingApplication,
-  getTrainingApplicationListPage,
-  getTrainingList
-} from "@/api/training/index"
+<script setup lang="ts">
+import { reactive, ref, watch } from "vue"
+import { addNotice, deleteNotice, updateNotice, getNoticeListPage } from "@/api/information/index"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
 import { CirclePlus, Delete, RefreshRight } from "@element-plus/icons-vue"
 import { usePagination } from "@/hooks/usePagination"
-import { TrainingApplication, TrainingApplicationEntity } from "@/api/training/types/application"
-import { getUserList } from "@/api/user"
-import { User } from "@/api/user/types/user"
-import { Training } from "@/api/training/types/training"
+import { NoticeResult } from "@/api/information/types/notice"
 
 defineOptions({
   // 命名当前组件
-  name: "application"
+  name: "notice"
 })
 
 const loading = ref<boolean>(false)
@@ -27,23 +18,49 @@ const { paginationData, handleCurrentChange, handleSizeChange } = usePagination(
 const dialogVisible = ref<boolean>(false)
 const formRef = ref<FormInstance | null>(null)
 const formData = reactive({
-  trainingApplicationId: "",
-  userId: "",
-  trainingId: "",
-  applicationStatus: 0,
-  createTime: ""
+  noticeId: "0",
+  createTime: "",
+  content: "",
+  title: ""
 })
+
+const shortcuts = [
+  {
+    text: "今天",
+    value: new Date()
+  },
+  {
+    text: "昨天",
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24)
+      return date
+    }
+  },
+  {
+    text: "一周前",
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
+      return date
+    }
+  }
+]
+
+const disabledDate = (time: Date) => {
+  datePickerValue.value = time.toString()
+}
+
 const formRules: FormRules = reactive({
-  // equipmentId: [{ required: true, trigger: "blur", message: "设备id不能为空" }],
-  trainingName: [{ required: true, trigger: "blur", message: "培训名不能为空" }],
-  trainingPrice: [{ required: true, trigger: "blur", message: "价格不能为空" }],
-  trainingType: [{ required: true, trigger: "blur", message: "培训类型不能为空" }]
+  title: [{ required: true, trigger: "blur", message: "通知的标题不能为空" }],
+  content: [{ required: true, trigger: "blur", message: "通知的内容不能为空" }],
+  createTime: [{ required: true, trigger: "blur", message: "通知的创建时间不能为空" }]
 })
 const handleCreate = () => {
   formRef.value?.validate((valid: boolean, fields) => {
     if (valid) {
       if (currentUpdateId.value === undefined) {
-        addTrainingApplication(formData)
+        addNotice(formData)
           .then(() => {
             ElMessage.success("新增成功")
             getTableData()
@@ -52,12 +69,11 @@ const handleCreate = () => {
             dialogVisible.value = false
           })
       } else {
-        updateTrainingApplication({
-          trainingApplicationId: formData.trainingApplicationId,
-          userId: formData.userId,
-          trainingId: formData.trainingId,
-          applicationStatus: formData.applicationStatus,
-          createTime: formData.createTime
+        updateNotice({
+          noticeId: formData.noticeId,
+          createTime: formData.createTime,
+          content: formData.content,
+          title: formData.title
         })
           .then(() => {
             ElMessage.success("修改成功")
@@ -75,13 +91,13 @@ const handleCreate = () => {
 //#endregion
 
 //#region 删
-const handleDelete = (row: TrainingApplication) => {
-  ElMessageBox.confirm(`正在删除用户${row.userId}的申请，确认删除？`, "提示", {
+const handleDelete = (row: NoticeResult) => {
+  ElMessageBox.confirm(`正在删除实验室${row.noticeId}的相关信息，确认删除？`, "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning"
   }).then(() => {
-    deleteTrainingApplication(row.trainingApplicationId).then(() => {
+    deleteNotice(row.noticeId).then(() => {
       ElMessage.success("删除成功")
       getTableData()
     })
@@ -90,8 +106,8 @@ const handleDelete = (row: TrainingApplication) => {
 //#endregion
 
 //#region 批量删除
-const selection = ref<TrainingApplication[]>([])
-const handleSelectionChange = (rows: TrainingApplication[]) => {
+const selection = ref<NoticeResult[]>([])
+const handleSelectionChange = (rows: NoticeResult[]) => {
   selection.value = rows
 }
 
@@ -109,8 +125,7 @@ const deleteBatch = async () => {
     })
 
     // 使用 Promise.all 等待所有删除操作完成
-    await Promise.all(selection.value.map((item) => deleteTrainingApplication(item.trainingApplicationId)))
-
+    await Promise.all(selection.value.map((item) => deleteNotice(item.noticeId)))
     ElMessage.success("删除成功")
     getTableData()
   } catch (error) {
@@ -121,48 +136,28 @@ const deleteBatch = async () => {
 
 //#region 改
 const currentUpdateId = ref<undefined | string>(undefined)
-const handleUpdate = (row: TrainingApplication) => {
-  currentUpdateId.value = row.trainingApplicationId
-  formData.trainingApplicationId = row.trainingApplicationId
-  formData.userId = row.userId
-  formData.trainingId = row.trainingId
-  formData.applicationStatus = row.applicationStatus
+const handleUpdate = (row: NoticeResult) => {
+  currentUpdateId.value = row.noticeId
+
+  formData.noticeId = row.noticeId
   formData.createTime = row.createTime
+  formData.content = row.content
+  formData.title = row.title
   dialogVisible.value = true
 }
-
-const userList = ref<User[]>([])
-const trainingProjectList = ref<Training[]>([])
-//获取用户列表
-const getUsers = () => {
-  getUserList().then((res) => {
-    userList.value = res.data
-  })
-}
-//获取申请项目列表
-const getTrainings = () => {
-  getTrainingList().then((res) => {
-    trainingProjectList.value = res.data
-  })
-}
-
-onMounted(() => {
-  getUsers()
-  getTrainings()
-})
 //#endregion
 
 //#region 查
-const tableData = ref<TrainingApplicationEntity[]>([])
+const tableData = ref<NoticeResult[]>([])
 const getTableData = () => {
   loading.value = true
-
-  getTrainingApplicationListPage({
+  getNoticeListPage({
     cur: paginationData.currentPage,
     size: paginationData.pageSize
   })
     .then((res) => {
-      tableData.value = res
+      paginationData.total = res.data.length
+      tableData.value = res.data
     })
     .catch(() => {
       tableData.value = []
@@ -173,33 +168,21 @@ const getTableData = () => {
 }
 //#endregion
 
-const getStatusText = (status: number | string) => {
-  if (status === 0) {
-    return "未审核"
-  } else if (status === 1) {
-    return "通过"
-  } else if (status === 2) {
-    return "驳回"
-  } else {
-    return "未知状态"
-  }
-}
-const getStatusClass = (status: string) => {
-  return `status-${status}`
-}
-
 const resetForm = () => {
   currentUpdateId.value = undefined
 
-  formData.trainingApplicationId = ""
-  formData.userId = ""
-  formData.trainingId = ""
-  formData.applicationStatus = 0
+  // formData.noticeId = ""
   formData.createTime = ""
+  formData.content = ""
+  formData.title = ""
 }
 
+const datePickerValue = ref("")
 /** 监听分页参数的变化 */
 watch([() => paginationData.currentPage, () => paginationData.pageSize], getTableData, { immediate: true })
+watch(datePickerValue, (newDate) => {
+  formData.createTime = newDate
+})
 </script>
 
 <template>
@@ -207,7 +190,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
     <el-card v-loading="loading" shadow="never">
       <div class="toolbar-wrapper">
         <div>
-          <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增培训申请</el-button>
+          <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增公告</el-button>
           <el-button type="danger" :icon="Delete" @click="deleteBatch">批量删除</el-button>
         </div>
         <div>
@@ -219,14 +202,10 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
       <div class="table-wrapper">
         <el-table :data="tableData" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="50" align="center" />
-          <el-table-column prop="username" label="申请人" align="center" />
-          <el-table-column prop="trainingName" label="培训项目" align="center" />
-          <el-table-column prop="applicationStatus" label="申请状态" align="center">
-            <template v-slot="{ row }">
-              <span :class="getStatusClass(row.applicationStatus)">{{ getStatusText(row.applicationStatus) }}</span>
-            </template>
-          </el-table-column>
+          <!--          <el-table-column prop="noticeId" label="公告id" align="center" />-->
           <el-table-column prop="createTime" label="创建时间" align="center" />
+          <el-table-column prop="content" label="公告内容" align="center" />
+          <el-table-column prop="title" label="公告标题" align="center" />
           <el-table-column fixed="right" label="操作" width="150" align="center">
             <template #default="scope">
               <el-button type="primary" text bg size="small" @click="handleUpdate(scope.row)">修改</el-button>
@@ -251,32 +230,28 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
     <!-- 新增/修改 -->
     <el-dialog
       v-model="dialogVisible"
-      :title="currentUpdateId === undefined ? '新增培训申请' : '修改培训申请'"
+      :title="currentUpdateId === undefined ? '新增公告' : '修改公告'"
       @close="resetForm"
       width="30%"
     >
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px" label-position="left">
-        <el-form-item label="用户名">
-          <el-select v-model="formData.userId" placeholder="请输入">
-            <el-option v-for="user in userList" :label="user.username" :value="user.userId" :key="user.userId" />
-          </el-select>
+        <!--        <el-form-item prop="noticeId" label="公告id">-->
+        <!--          <el-input v-model="formData.noticeId" placeholder="请输入" />-->
+        <!--        </el-form-item>-->
+        <el-form-item prop="createTime" label="创建时间">
+          <el-date-picker
+            v-model="datePickerValue"
+            type="date"
+            placeholder="选择一天"
+            :disabled-date="disabledDate"
+            :shortcuts="shortcuts"
+          />
         </el-form-item>
-        <el-form-item label="培训项目">
-          <el-select v-model="formData.trainingId" placeholder="请输入">
-            <el-option
-              v-for="training in trainingProjectList"
-              :label="training.trainingName"
-              :value="training.trainingId"
-              :key="training.trainingId"
-            />
-          </el-select>
+        <el-form-item prop="content" label="公告内容">
+          <el-input v-model="formData.content" placeholder="请输入" />
         </el-form-item>
-        <el-form-item label="申请状态">
-          <el-radio-group v-model="formData.applicationStatus">
-            <el-radio label="0">未审核</el-radio>
-            <el-radio label="1">通过</el-radio>
-            <el-radio label="2">驳回</el-radio>
-          </el-radio-group>
+        <el-form-item prop="title" label="公告标题">
+          <el-input v-model="formData.title" placeholder="请输入" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -287,7 +262,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style scoped lang="scss">
 .search-wrapper {
   margin-bottom: 20px;
   :deep(.el-card__body) {
@@ -308,18 +283,5 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
 .pager-wrapper {
   display: flex;
   justify-content: flex-end;
-}
-
-/* 根据状态值自定义样式 */
-.status-0 {
-  color: blue; /* 未审核状态的文字颜色为蓝色 */
-}
-
-.status-1 {
-  color: green; /* 通过状态的文字颜色为绿色 */
-}
-
-.status-2 {
-  color: red; /* 驳回状态的文字颜色为红色 */
 }
 </style>
