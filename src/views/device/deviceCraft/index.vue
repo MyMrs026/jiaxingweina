@@ -1,14 +1,14 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { reactive, ref, watch } from "vue"
-import { addLabinform, deleteLabinform, updateLabinform, getLabinformListPage } from "@/api/information/index"
+import { addEquCraft, deleteEquCraft, getEquCraftListPage } from "@/api/device/index"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
 import { CirclePlus, Delete, RefreshRight } from "@element-plus/icons-vue"
 import { usePagination } from "@/hooks/usePagination"
-import { LabinformResult } from "@/api/information/types/labinform"
+import { EquCraft } from "@/api/device/types/deviceCraft"
 
 defineOptions({
   // 命名当前组件
-  name: "labinform"
+  name: "project"
 })
 
 const loading = ref<boolean>(false)
@@ -18,25 +18,22 @@ const { paginationData, handleCurrentChange, handleSizeChange } = usePagination(
 const dialogVisible = ref<boolean>(false)
 const formRef = ref<FormInstance | null>(null)
 const formData = reactive({
-  // labId: "",
-  labAddress: "",
-  labLayoutUrl: "",
-  labLinkman: "",
-  labName: "",
-  labTel: ""
+  equipmentId: "",
+  equipmentAttrId: "",
+  attrName: "",
+  attrValue: ""
 })
 const formRules: FormRules = reactive({
-  labName: [{ required: true, trigger: "blur", message: "实验室名不能为空" }],
-  labAddress: [{ required: true, trigger: "blur", message: "实验室地址不能为空" }],
-  labLinkman: [{ required: true, trigger: "blur", message: "实验室负责人不能为空" }],
-  labTel: [{ required: true, trigger: "blur", message: "实验室联系电话不能为空" }]
+  equipmentId: [{ required: true, trigger: "blur", message: "设备id不能为空" }],
+  equipmentAttrId: [{ required: true, trigger: "blur", message: "设备工艺id不能为空" }],
+  attrName: [{ required: true, trigger: "blur", message: "工艺名称不能为空" }],
+  attrValue: [{ required: true, trigger: "blur", message: "工艺参数不能为空" }]
 })
 const handleCreate = () => {
   formRef.value?.validate((valid: boolean, fields) => {
     if (valid) {
       if (currentUpdateId.value === undefined) {
-        // console.log(formData)
-        addLabinform(formData)
+        addEquCraft(formData)
           .then(() => {
             ElMessage.success("新增成功")
             getTableData()
@@ -45,37 +42,35 @@ const handleCreate = () => {
             dialogVisible.value = false
           })
       } else {
-        updateLabinform({
-          // labId: formData.labId,
-          labAddress: formData.labAddress,
-          labLayoutUrl: formData.labLayoutUrl,
-          labLinkman: formData.labLinkman,
-          labName: formData.labName,
-          labTel: formData.labTel
-        })
-          .then(() => {
-            ElMessage.success("修改成功")
-            getTableData()
-          })
-          .finally(() => {
-            dialogVisible.value = false
-          })
+        // updateTraining({
+        //   trainingId: formData.trainingId,
+        //   equipmentId: formData.equipmentId || "",
+        //   trainingName: formData.trainingName,
+        //   trainingPrice: formData.trainingPrice,
+        //   trainingType: formData.trainingType
+        // })
+        //   .then(() => {
+        //     ElMessage.success("修改成功")
+        //     getTableData()
+        //   })
+        //   .finally(() => {
+        //     dialogVisible.value = false
+        //   })
+        console.error("表单校验不通过", fields)
       }
-    } else {
-      console.error("表单校验不通过", fields)
     }
   })
 }
 //#endregion
 
 //#region 删
-const handleDelete = (row: LabinformResult) => {
-  ElMessageBox.confirm(`正在删除实验室${row.labId}的相关信息，确认删除？`, "提示", {
+const handleDelete = (row: EquCraft) => {
+  ElMessageBox.confirm(`正在删除工艺参数：${row.attrName}，确认删除？`, "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning"
   }).then(() => {
-    deleteLabinform(row.labId).then(() => {
+    deleteEquCraft(row.equipmentId).then(() => {
       ElMessage.success("删除成功")
       getTableData()
     })
@@ -84,55 +79,59 @@ const handleDelete = (row: LabinformResult) => {
 //#endregion
 
 //#region 批量删除
-const selection = ref<LabinformResult[]>([])
-const handleSelectionChange = (rows: LabinformResult[]) => {
+const selection = ref<EquCraft[]>([])
+const handleSelectionChange = (rows: EquCraft[]) => {
   selection.value = rows
 }
 
-const deleteBatch = async () => {
+const deleteBatch = () => {
   if (selection.value.length === 0) {
     ElMessage.error("未选中删除目标")
     return
-  }
-
-  try {
-    await ElMessageBox.confirm(`正在批量删除培训申请，确认删除？`, "提示", {
+  } else {
+    ElMessageBox.confirm(`正在批量删除工艺参数，确认删除？`, "提示", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
       type: "warning"
     })
+      .then(() => {
+        // Create an array of promises for delete operations
+        const deletePromises = selection.value.map((item) => deleteEquCraft(item.equipmentId))
 
-    // 使用 Promise.all 等待所有删除操作完成
-    await Promise.all(selection.value.map((item) => deleteLabinform(item.labId)))
-
-    ElMessage.success("删除成功")
-    getTableData()
-  } catch (error) {
-    console.error(error)
+        // Use Promise.all to wait for all delete operations to complete
+        return Promise.all(deletePromises)
+      })
+      .then(() => {
+        ElMessage.success("删除成功")
+        return getTableData()
+      })
+      .catch((error) => {
+        console.error(error)
+      })
   }
 }
+
 //#endregion
 
 //#region 改
 const currentUpdateId = ref<undefined | string>(undefined)
-const handleUpdate = (row: LabinformResult) => {
-  currentUpdateId.value = row.labId
+// const handleUpdate = (row: EquCraft) => {
+//   currentUpdateId.value = row.trainingId
 
-  // formData.labId = row.labId
-  formData.labAddress = row.labAddress
-  formData.labLayoutUrl = row.labLayoutUrl
-  formData.labLinkman = row.labLinkman
-  formData.labName = row.labName
-  formData.labTel = row.labTel
-  dialogVisible.value = true
-}
+//   formData.equipmentId = row.equipmentId || ""
+//   formData.trainingId = row.trainingId
+//   formData.trainingName = row.trainingName
+//   formData.trainingPrice = row.trainingPrice
+//   formData.trainingType = row.trainingType
+//   dialogVisible.value = true
+// }
 //#endregion
 
 //#region 查
-const tableData = ref<LabinformResult[]>([])
+const tableData = ref<EquCraft[]>([])
 const getTableData = () => {
   loading.value = true
-  getLabinformListPage({
+  getEquCraftListPage({
     cur: paginationData.currentPage,
     size: paginationData.pageSize
   })
@@ -149,16 +148,15 @@ const getTableData = () => {
 }
 //#endregion
 
-const resetForm = () => {
-  currentUpdateId.value = undefined
+// const resetForm = () => {
+//   currentUpdateId.value = undefined
 
-  // formData.labId = ""
-  formData.labAddress = ""
-  formData.labLayoutUrl = ""
-  formData.labLinkman = ""
-  formData.labName = ""
-  formData.labTel = ""
-}
+//   formData.equipmentId = ""
+//   formData.trainingId = ""
+//   formData.trainingName = ""
+//   formData.trainingPrice = 0
+//   formData.trainingType = ""
+// }
 
 /** 监听分页参数的变化 */
 watch([() => paginationData.currentPage, () => paginationData.pageSize], getTableData, { immediate: true })
@@ -169,7 +167,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
     <el-card v-loading="loading" shadow="never">
       <div class="toolbar-wrapper">
         <div>
-          <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增实验室信息</el-button>
+          <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增工艺参数</el-button>
           <el-button type="danger" :icon="Delete" @click="deleteBatch">批量删除</el-button>
         </div>
         <div>
@@ -181,12 +179,12 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
       <div class="table-wrapper">
         <el-table :data="tableData" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="50" align="center" />
-          <el-table-column prop="labId" label="实验室id" align="center" />
-          <el-table-column prop="labAddress" label="实验室地址" align="center" />
-          <el-table-column prop="labLayoutUrl" label="实验室布局图" align="center" />
-          <el-table-column prop="labLinkman" label="实验室负责人" align="center" />
-          <el-table-column prop="labName" label="实验室名" align="center" />
-          <el-table-column prop="labTel" label="实验联系电话" align="center" />
+
+          <el-table-column prop="equipmentId" label="设备id" align="center" />
+          <el-table-column prop="equipmentAttrId" label="设备工艺id" align="center" />
+          <el-table-column prop="attrName" label="工艺名称" align="center" />
+          <el-table-column prop="attrValue" label="工艺参数" align="center" />
+
           <el-table-column fixed="right" label="操作" width="150" align="center">
             <template #default="scope">
               <el-button type="primary" text bg size="small" @click="handleUpdate(scope.row)">修改</el-button>
@@ -211,28 +209,22 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
     <!-- 新增/修改 -->
     <el-dialog
       v-model="dialogVisible"
-      :title="currentUpdateId === undefined ? '新增实验室' : '修改实验室'"
+      :title="currentUpdateId === undefined ? '新增用户' : '修改用户'"
       @close="resetForm"
       width="30%"
     >
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px" label-position="left">
-        <!--        <el-form-item prop="labId" label="实验室id">-->
-        <!--          <el-input v-model="formData.labId" placeholder="请输入" />-->
-        <!--        </el-form-item>-->
-        <el-form-item prop="labAddress" label="实验室地址">
-          <el-input v-model="formData.labAddress" placeholder="请输入" />
+        <el-form-item prop="equipmentId" label="设备id">
+          <el-input v-model="formData.equipmentId" placeholder="请输入" />
         </el-form-item>
-        <el-form-item prop="labLayoutUrl" label="实验室布局图">
-          <el-input v-model="formData.labLayoutUrl" placeholder="请输入" />
+        <el-form-item prop="equipmentAttrId" label="设备工艺id">
+          <el-input v-model="formData.equipmentAttrId" placeholder="请输入" />
         </el-form-item>
-        <el-form-item prop="labLinkman" label="实验室联系人">
-          <el-input v-model="formData.labLinkman" placeholder="请输入" />
+        <el-form-item prop="attrName" label="工艺名称">
+          <el-input v-model="formData.attrName" placeholder="请输入" />
         </el-form-item>
-        <el-form-item prop="labName" label="实验室名字">
-          <el-input v-model="formData.labName" placeholder="请输入" />
-        </el-form-item>
-        <el-form-item prop="labTel" label="实验室联系电话">
-          <el-input v-model="formData.labTel" placeholder="请输入" />
+        <el-form-item prop="attrValue" label="工艺参数">
+          <el-input v-model="formData.attrValue" placeholder="请输入" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -243,7 +235,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
   </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .search-wrapper {
   margin-bottom: 20px;
   :deep(.el-card__body) {
