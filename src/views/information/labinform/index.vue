@@ -18,7 +18,7 @@ const { paginationData, handleCurrentChange, handleSizeChange } = usePagination(
 const dialogVisible = ref<boolean>(false)
 const formRef = ref<FormInstance | null>(null)
 const formData = reactive({
-  labId: "",
+  // labId: "",
   labAddress: "",
   labLayoutUrl: "",
   labLinkman: "",
@@ -35,6 +35,7 @@ const handleCreate = () => {
   formRef.value?.validate((valid: boolean, fields) => {
     if (valid) {
       if (currentUpdateId.value === undefined) {
+        // console.log(formData)
         addLabinform(formData)
           .then(() => {
             ElMessage.success("新增成功")
@@ -45,7 +46,7 @@ const handleCreate = () => {
           })
       } else {
         updateLabinform({
-          labId: formData.labId,
+          // labId: formData.labId,
           labAddress: formData.labAddress,
           labLayoutUrl: formData.labLayoutUrl,
           labLinkman: formData.labLinkman,
@@ -117,7 +118,7 @@ const currentUpdateId = ref<undefined | string>(undefined)
 const handleUpdate = (row: LabinformResult) => {
   currentUpdateId.value = row.labId
 
-  formData.labId = row.labId
+  // formData.labId = row.labId
   formData.labAddress = row.labAddress
   formData.labLayoutUrl = row.labLayoutUrl
   formData.labLinkman = row.labLinkman
@@ -151,7 +152,7 @@ const getTableData = () => {
 const resetForm = () => {
   currentUpdateId.value = undefined
 
-  formData.labId = ""
+  // formData.labId = ""
   formData.labAddress = ""
   formData.labLayoutUrl = ""
   formData.labLinkman = ""
@@ -215,9 +216,9 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
       width="30%"
     >
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px" label-position="left">
-        <el-form-item prop="labId" label="实验室id">
-          <el-input v-model="formData.labId" placeholder="请输入" />
-        </el-form-item>
+        <!--        <el-form-item prop="labId" label="实验室id">-->
+        <!--          <el-input v-model="formData.labId" placeholder="请输入" />-->
+        <!--        </el-form-item>-->
         <el-form-item prop="labAddress" label="实验室地址">
           <el-input v-model="formData.labAddress" placeholder="请输入" />
         </el-form-item>
