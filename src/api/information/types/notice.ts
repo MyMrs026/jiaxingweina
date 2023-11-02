@@ -6,14 +6,14 @@ export interface AddNoticeRequest {
 }
 
 export interface UpdateNoticeRequest {
-  noticeId?: string
+  noticeId: string
   createTime: string
   content: string
   title: string
 }
 
 export interface NoticeResult {
-  noticeId?: string
+  noticeId: string
   createTime: string
   content: string
   title: string

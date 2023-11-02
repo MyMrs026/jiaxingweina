@@ -51,6 +51,7 @@ const handleCreate = () => {
           })
       } else {
         updateNotice({
+          noticeId: currentUpdateId.value,
           createTime: formatCrateTime(formData.createTime),
           content: formData.content,
           title: formData.title
@@ -119,6 +120,7 @@ const deleteBatch = async () => {
 //#region 改
 const currentUpdateId = ref<undefined | string>(undefined)
 const handleUpdate = (row: NoticeResult) => {
+  // console.log(row.noticeId)
   currentUpdateId.value = row.noticeId
   formData.createTime = formatCrateTime(row.createTime)
   formData.content = row.content

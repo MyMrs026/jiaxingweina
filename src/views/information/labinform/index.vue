@@ -46,7 +46,7 @@ const handleCreate = () => {
           })
       } else {
         updateLabinform({
-          // labId: formData.labId,
+          labId: currentUpdateId.value,
           labAddress: formData.labAddress,
           labLayoutUrl: formData.labLayoutUrl,
           labLinkman: formData.labLinkman,
@@ -117,8 +117,6 @@ const deleteBatch = async () => {
 const currentUpdateId = ref<undefined | string>(undefined)
 const handleUpdate = (row: LabinformResult) => {
   currentUpdateId.value = row.labId
-
-  // formData.labId = row.labId
   formData.labAddress = row.labAddress
   formData.labLayoutUrl = row.labLayoutUrl
   formData.labLinkman = row.labLinkman
@@ -151,7 +149,6 @@ const getTableData = () => {
 
 const resetForm = () => {
   currentUpdateId.value = undefined
-
   // formData.labId = ""
   formData.labAddress = ""
   formData.labLayoutUrl = ""
