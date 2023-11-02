@@ -8,7 +8,7 @@ export interface AddLabinformRequest {
 }
 
 export interface UpdateLabinformRequest {
-  labId?: string
+  labId: string
   labAddress: string
   labLayoutUrl: string
   labLinkman: string
@@ -17,7 +17,7 @@ export interface UpdateLabinformRequest {
 }
 
 export interface LabinformResult {
-  labId?: string
+  labId: string
   labAddress: string
   labLayoutUrl: string
   labLinkman: string
