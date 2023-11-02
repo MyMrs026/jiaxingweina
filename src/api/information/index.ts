@@ -1,6 +1,7 @@
 import { request } from "@/utils/service"
 import type * as LabinformResult from "./types/labinform"
 import type * as NoticeResult from "./types/notice"
+import { UnwrapRef } from "vue"
 
 interface PageParams {
   /** 当前页码 */
@@ -57,7 +58,7 @@ export function addNotice(data: NoticeResult.AddNoticeRequest) {
 }
 
 /** 删 */
-export function deleteNotice(id: string) {
+export function deleteNotice(id: UnwrapRef<NoticeResult["noticeId"]> | undefined) {
   return request({
     url: `message/notice/remove/${id}`,
     method: "delete"
