@@ -121,7 +121,6 @@ const deleteBatch = async () => {
 const currentUpdateId = ref<undefined | string>(undefined)
 const handleUpdate = (row: TrainingResult) => {
   currentUpdateId.value = row.trainingResultId
-
   formData.trainingResultId = row.trainingResultId
   formData.trainingApplicationId = row.trainingApplicationId
   formData.result = row.result
@@ -154,7 +153,6 @@ const getTableData = () => {
 
 const resetForm = () => {
   currentUpdateId.value = undefined
-
   formData.trainingResultId = ""
   formData.trainingApplicationId = ""
   formData.result = ""
