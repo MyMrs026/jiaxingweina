@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref, watch } from "vue"
+import { computed, reactive, ref, watch } from "vue"
 import { addNotice, deleteNotice, updateNotice, getNoticeListPage } from "@/api/information/index"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
 import { CirclePlus, Delete, RefreshRight } from "@element-plus/icons-vue"
@@ -18,8 +18,8 @@ const { paginationData, handleCurrentChange, handleSizeChange } = usePagination(
 const dialogVisible = ref<boolean>(false)
 const formRef = ref<FormInstance | null>(null)
 const formData = reactive({
-  noticeId: "0",
-  createTime: "",
+  // noticeId: "0",
+  createTime: new Date().toString(),
   content: "",
   title: ""
 })
@@ -28,28 +28,8 @@ const shortcuts = [
   {
     text: "今天",
     value: new Date()
-  },
-  {
-    text: "昨天",
-    value: () => {
-      const date = new Date()
-      date.setTime(date.getTime() - 3600 * 1000 * 24)
-      return date
-    }
-  },
-  {
-    text: "一周前",
-    value: () => {
-      const date = new Date()
-      date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
-      return date
-    }
   }
 ]
-
-const disabledDate = (time: Date) => {
-  datePickerValue.value = time.toString()
-}
 
 const formRules: FormRules = reactive({
   title: [{ required: true, trigger: "blur", message: "通知的标题不能为空" }],
@@ -60,7 +40,8 @@ const handleCreate = () => {
   formRef.value?.validate((valid: boolean, fields) => {
     if (valid) {
       if (currentUpdateId.value === undefined) {
-        addNotice(formData)
+        console.log(formattedFormData.value)
+        addNotice(formattedFormData.value)
           .then(() => {
             ElMessage.success("新增成功")
             getTableData()
@@ -70,8 +51,8 @@ const handleCreate = () => {
           })
       } else {
         updateNotice({
-          noticeId: formData.noticeId,
-          createTime: formData.createTime,
+          noticeId: currentUpdateId.value,
+          createTime: formatCrateTime(formData.createTime),
           content: formData.content,
           title: formData.title
         })
@@ -97,10 +78,12 @@ const handleDelete = (row: NoticeResult) => {
     cancelButtonText: "取消",
     type: "warning"
   }).then(() => {
-    deleteNotice(row.noticeId).then(() => {
-      ElMessage.success("删除成功")
-      getTableData()
-    })
+    if (row.noticeId != null) {
+      deleteNotice(row.noticeId).then(() => {
+        ElMessage.success("删除成功")
+        getTableData()
+      })
+    }
   })
 }
 //#endregion
@@ -137,10 +120,9 @@ const deleteBatch = async () => {
 //#region 改
 const currentUpdateId = ref<undefined | string>(undefined)
 const handleUpdate = (row: NoticeResult) => {
+  // console.log(row.noticeId)
   currentUpdateId.value = row.noticeId
-
-  formData.noticeId = row.noticeId
-  formData.createTime = row.createTime
+  formData.createTime = formatCrateTime(row.createTime)
   formData.content = row.content
   formData.title = row.title
   dialogVisible.value = true
@@ -170,9 +152,7 @@ const getTableData = () => {
 
 const resetForm = () => {
   currentUpdateId.value = undefined
-
-  // formData.noticeId = ""
-  formData.createTime = ""
+  formData.createTime = new Date().toString()
   formData.content = ""
   formData.title = ""
 }
@@ -181,8 +161,35 @@ const datePickerValue = ref("")
 /** 监听分页参数的变化 */
 watch([() => paginationData.currentPage, () => paginationData.pageSize], getTableData, { immediate: true })
 watch(datePickerValue, (newDate) => {
-  formData.createTime = newDate
+  formData.createTime = newDate as never
 })
+const formattedFormData = computed(() => {
+  const formattedData = { ...formData }
+  //将createTime字段的值转换为所需的格式
+  const inputDate = new Date(formattedData.createTime)
+  const year = inputDate.getFullYear()
+  const month = String(inputDate.getMonth() + 1).padStart(2, "0")
+  const day = String(inputDate.getDate()).padStart(2, "0")
+  const hours = String(inputDate.getHours()).padStart(2, "0")
+  const minutes = String(inputDate.getMinutes()).padStart(2, "0")
+  const seconds = String(inputDate.getSeconds()).padStart(2, "0")
+
+  formattedData.createTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+
+  return formattedData
+})
+
+const formatCrateTime = (createTime: string) => {
+  const inputDate = new Date(createTime)
+  const year = inputDate.getFullYear()
+  const month = String(inputDate.getMonth() + 1).padStart(2, "0")
+  const day = String(inputDate.getDate()).padStart(2, "0")
+  const hours = String(inputDate.getHours()).padStart(2, "0")
+  const minutes = String(inputDate.getMinutes()).padStart(2, "0")
+  const seconds = String(inputDate.getSeconds()).padStart(2, "0")
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+}
 </script>
 
 <template>
@@ -235,17 +242,8 @@ watch(datePickerValue, (newDate) => {
       width="30%"
     >
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px" label-position="left">
-        <!--        <el-form-item prop="noticeId" label="公告id">-->
-        <!--          <el-input v-model="formData.noticeId" placeholder="请输入" />-->
-        <!--        </el-form-item>-->
         <el-form-item prop="createTime" label="创建时间">
-          <el-date-picker
-            v-model="datePickerValue"
-            type="date"
-            placeholder="选择一天"
-            :disabled-date="disabledDate"
-            :shortcuts="shortcuts"
-          />
+          <el-date-picker v-model="datePickerValue" type="datetime" placeholder="选择日期时间" :shortcuts="shortcuts" />
         </el-form-item>
         <el-form-item prop="content" label="公告内容">
           <el-input v-model="formData.content" placeholder="请输入" />

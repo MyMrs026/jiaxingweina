@@ -1,5 +1,5 @@
 export interface AddLabinformRequest {
-  labId: string
+  labId?: string
   labAddress: string
   labLayoutUrl: string
   labLinkman: string
