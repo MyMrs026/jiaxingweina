@@ -1,5 +1,5 @@
 export interface AddNoticeRequest {
-  noticeId: string
+  noticeId?: string
   createTime: string
   content: string
   title: string

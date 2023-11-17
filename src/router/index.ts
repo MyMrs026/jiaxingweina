@@ -147,6 +147,37 @@ export const constantRoutes: RouteRecordRaw[] = [
         }
       }
     ]
+  },
+  {
+    path: "/device",
+    name: "device",
+    component: Layouts,
+    redirect: "/device/project",
+    meta: {
+      title: "设备管理",
+      elIcon: "Menu",
+      alwaysShow: true
+    },
+    children: [
+      {
+        path: "deviceList",
+        component: () => import("@/views/device/deviceList/index.vue"),
+        name: "deviceList",
+        meta: {
+          title: "设备列表",
+          keepAlive: true
+        }
+      },
+      {
+        path: "deviceCraft",
+        component: () => import("@/views/device/deviceCraft/index.vue"),
+        name: "deviceCraft",
+        meta: {
+          title: "设备工艺",
+          keepAlive: true
+        }
+      }
+    ]
   }
 ]
 
