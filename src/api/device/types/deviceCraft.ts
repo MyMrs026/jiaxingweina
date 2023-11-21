@@ -1,6 +1,5 @@
 export interface AddEquCraftRequest {
-  equipmentId?: string
-  equipmentAttrId: string
+  equipmentId: string
   attrName: string
   attrValue: string
 }
