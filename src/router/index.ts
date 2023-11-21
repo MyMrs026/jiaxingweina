@@ -167,6 +167,16 @@ export const constantRoutes: RouteRecordRaw[] = [
           title: "设备列表",
           keepAlive: true
         }
+      },
+      {
+        path: ":id/orders",
+        component: () => import("@/views/device/orders/index.vue"),
+        name: "orders",
+        meta: {
+          title: "预约列表",
+          hidden: true,
+          keepAlive: true
+        }
       }
     ]
   }
