@@ -14,6 +14,7 @@ import { CirclePlus, Delete, RefreshRight } from "@element-plus/icons-vue"
 import { usePagination } from "@/hooks/usePagination"
 import { Equipment } from "@/api/device/types/deviceList"
 import { EquCraft } from "@/api/device/types/deviceCraft"
+import router from "@/router"
 
 defineOptions({
   // 命名当前组件
@@ -297,6 +298,11 @@ const cellStyle = () => {
 //   return { 'background-color': 'lightgreen' };
 // }
 
+const toOrderPage = (row: Equipment) => {
+  const equipmentId = row.equipmentId
+  router.push("/device/" + equipmentId + "/orders")
+}
+
 /** 监听分页参数的变化 */
 watch([() => paginationData.currentPage, () => paginationData.pageSize], getTableData, { immediate: true })
 </script>
@@ -342,11 +348,12 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
           <el-table-column prop="manufacturer" label="制造商" align="center" />
           <el-table-column prop="createTime" label="创建时间" align="center" />
           <el-table-column prop="updateTime" label="更新时间" align="center" />
-          <el-table-column fixed="right" label="操作" width="230" align="center">
+          <el-table-column fixed="right" label="操作" width="300" align="center">
             <template #default="scope">
               <el-button type="primary" text bg size="small" @click="handleUpdate(scope.row)">修改</el-button>
               <el-button type="danger" text bg size="small" @click="handleDelete(scope.row)">删除</el-button>
               <el-button type="info" text bg size="small" @click="handleShowParams(scope.row)">工艺参数</el-button>
+              <el-button type="info" text bg size="small" @click="toOrderPage(scope.row)">预约列表</el-button>
             </template>
           </el-table-column>
         </el-table>
