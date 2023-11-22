@@ -167,15 +167,6 @@ export const constantRoutes: RouteRecordRaw[] = [
           title: "设备列表",
           keepAlive: true
         }
-      },
-      {
-        path: "deviceCraft",
-        component: () => import("@/views/device/deviceCraft/index.vue"),
-        name: "deviceCraft",
-        meta: {
-          title: "设备工艺",
-          keepAlive: true
-        }
       }
     ]
   }

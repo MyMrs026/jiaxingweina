@@ -1,16 +1,24 @@
 <script lang="ts" setup>
 import { reactive, ref, watch } from "vue"
-import { addEquipment, deleteEquipment, updateEquipment, getEquipmentListPage } from "@/api/device/index"
+import {
+  addEquipment,
+  deleteEquipment,
+  updateEquipment,
+  getEquipmentListPage,
+  getEquCraftListByEquId,
+  addEquCraft,
+  deleteEquCraft
+} from "@/api/device"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
 import { CirclePlus, Delete, RefreshRight } from "@element-plus/icons-vue"
 import { usePagination } from "@/hooks/usePagination"
 import { Equipment } from "@/api/device/types/deviceList"
+import { EquCraft } from "@/api/device/types/deviceCraft"
 
 defineOptions({
   // 命名当前组件
   name: "EquipmentList"
 })
-
 const loading = ref<boolean>(false)
 const { paginationData, handleCurrentChange, handleSizeChange } = usePagination()
 
@@ -225,6 +233,70 @@ const resetForm = () => {
   formData.updateTime = ""
 }
 
+// 工艺参数
+const showParams = ref<boolean>(false)
+const params = ref<EquCraft[]>([])
+const newParamForm = reactive({
+  attrName: "",
+  attrValue: "",
+  equipmentId: ""
+})
+const handleShowParams = (raw: Equipment) => {
+  const equId = raw.equipmentId + ""
+  getParamsData(equId)
+  newParamForm.equipmentId = equId
+  showParams.value = true
+}
+
+const getParamsData = (equId: string) => {
+  getEquCraftListByEquId(equId).then((res) => {
+    console.log(res.data)
+    params.value = res.data
+  })
+}
+
+const newParamRules: FormRules = reactive({
+  attrName: [{ required: true, trigger: "blur", message: "设备名称不能为空" }],
+  attrValue: [{ required: true, trigger: "blur", message: "设备功能不能为空" }]
+})
+
+const newParamFormRef = ref<FormInstance | null>(null)
+
+const handleCreateParam = () => {
+  newParamFormRef.value?.validate((valid: boolean) => {
+    if (valid) {
+      addEquCraft(newParamForm).then(() => {
+        ElMessage.success("新增成功")
+        getParamsData(newParamForm.equipmentId)
+        resetAddParam()
+      })
+    }
+  })
+}
+
+const handleDeleteParam = (raw: EquCraft) => {
+  console.log(raw)
+  deleteEquCraft(raw.equipmentAttrId).then(() => {
+    ElMessage.success("删除成功")
+    getParamsData(newParamForm.equipmentId)
+  })
+}
+const resetAddParam = () => {
+  newParamForm.attrName = ""
+  newParamForm.attrValue = ""
+}
+
+const cellStyle = () => {
+  return { "background-color": "#ffffff" }
+}
+// function cellStyle({columnIndex}: { columnIndex: number }): { [key: string]: string } {
+// 这里可以根据需要设置不同列的背景颜色
+// if (columnIndex === 0) {
+//   return { 'background-color': 'lightblue' };
+// } else {
+//   return { 'background-color': 'lightgreen' };
+// }
+
 /** 监听分页参数的变化 */
 watch([() => paginationData.currentPage, () => paginationData.pageSize], getTableData, { immediate: true })
 </script>
@@ -244,34 +316,37 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
         </div>
       </div>
       <div class="table-wrapper">
-        <el-table :data="tableData" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="50" align="center" />
-
+        <el-table
+          :data="tableData"
+          @selection-change="handleSelectionChange"
+          show-overflow-tooltip
+          :cell-style="cellStyle"
+        >
+          <el-table-column fixed="left" type="selection" width="50" align="center" />
+          <el-table-column prop="equipmentName" width="200" label="设备名称" align="center" />
           <el-table-column prop="advanceTime" label="提前时间" align="center" />
-          <el-table-column prop="area" label="地区" align="center" />
-          <el-table-column prop="createTime" label="开始时间" align="center" />
-          <el-table-column prop="documentUrl" label="说明" align="center" />
+          <el-table-column prop="area" width="100" label="地区" align="center" />
+          <!--          <el-table-column prop="documentUrl" label="说明书" align="center" />-->
           <el-table-column prop="equipmentCategory" label="设备类别" align="center" />
           <el-table-column prop="equipmentFunction" label="设备功能" align="center" />
-          <el-table-column prop="equipmentId" label="设备id" align="center" />
           <el-table-column prop="equipmentImageUrl" label="设备图片" align="center" />
-          <el-table-column prop="equipmentName" label="设备名称" align="center" />
           <el-table-column prop="equipmentStatus" label="设备状态" align="center" />
-          <el-table-column prop="labName" label="实验室名称" align="center" />
           <el-table-column prop="linkman" label="联系人" align="center" />
           <el-table-column prop="linkmanTel" label="联系方式" align="center" />
-          <el-table-column prop="machineLabel" label="设备标签" align="center" />
-          <el-table-column prop="manufacturer" label="制造商" align="center" />
           <el-table-column prop="payment" label="机时价格" align="center" />
+          <el-table-column prop="labName" width="100" label="实验室名称" align="center" />
           <el-table-column prop="placementLocation" label="放置地点" align="center" />
           <el-table-column prop="remark" label="描述" align="center" />
           <el-table-column prop="specificationModel" label="规格型号" align="center" />
+          <el-table-column prop="machineLabel" label="设备标签" align="center" />
+          <el-table-column prop="manufacturer" label="制造商" align="center" />
+          <el-table-column prop="createTime" label="创建时间" align="center" />
           <el-table-column prop="updateTime" label="更新时间" align="center" />
-
-          <el-table-column fixed="right" label="操作" width="150" align="center">
+          <el-table-column fixed="right" label="操作" width="230" align="center">
             <template #default="scope">
               <el-button type="primary" text bg size="small" @click="handleUpdate(scope.row)">修改</el-button>
               <el-button type="danger" text bg size="small" @click="handleDelete(scope.row)">删除</el-button>
+              <el-button type="info" text bg size="small" @click="handleShowParams(scope.row)">工艺参数</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -363,12 +438,37 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
         <el-button type="primary" @click="handleCreate">确认</el-button>
       </template>
     </el-dialog>
+    <!-- 设备工艺参数 -->
+    <el-dialog v-model="showParams" title="工艺参数">
+      <el-form inline :model="newParamForm" :rules="newParamRules" ref="newParamFormRef">
+        <el-form-item label="参数" prop="attrName">
+          <el-input v-model="newParamForm.attrName" placeholder="请输入参数名" />
+        </el-form-item>
+        <el-form-item label="默认" prop="attrValue">
+          <el-input v-model="newParamForm.attrValue" placeholder="请输入默认值" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleCreateParam">新增</el-button>
+          <el-button type="primary" @click="resetAddParam">重置</el-button>
+        </el-form-item>
+      </el-form>
+      <el-table :data="params">
+        <el-table-column property="attrName" label="参数名" />
+        <el-table-column property="attrValue" label="默认值" />
+        <el-table-column label="操作">
+          <template #default="scope">
+            <el-button type="danger" @click="handleDeleteParam(scope.row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .search-wrapper {
   margin-bottom: 20px;
+
   :deep(.el-card__body) {
     padding-bottom: 2px;
   }

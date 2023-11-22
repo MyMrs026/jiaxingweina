@@ -4,7 +4,7 @@ import { addUser, deleteUser, updateUser, getUserListPage } from "@/api/user/ind
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
 import { CirclePlus, Delete, RefreshRight } from "@element-plus/icons-vue"
 import { usePagination } from "@/hooks/usePagination"
-import { User } from "@/api/training/types/result"
+import { User } from "@/api/user/types/user"
 
 defineOptions({
   // 命名当前组件
@@ -25,7 +25,9 @@ const formData = reactive({
   tel: "",
   email: "",
   company: "",
-  userRole: ""
+  userRole: "",
+  mentor: "",
+  labName: ""
 })
 const formRules: FormRules = reactive({
   username: [{ required: true, trigger: "blur", message: "用户名不能为空" }],

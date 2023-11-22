@@ -62,21 +62,11 @@ export function deleteEquCraft(id: string) {
   })
 }
 
-/** 改 */
-//   export function updateEquCraft(data: EquCraftList.UpdateEquCraftRequest) {
-//     return request({
-//       url: "equipment/update",
-//       method: "put",
-//       data
-//     })
-//   }
-
 /** 查 */
-export function getEquCraftListPage(params: PageParams) {
+export function getEquCraftListByEquId(equId: string) {
   return request<EquCraftList.GetEquCraftList>({
-    url: "equipment/page",
-    method: "get",
-    params
+    url: "equipment/attr/list/" + equId,
+    method: "get"
   })
 }
 //#endregion
