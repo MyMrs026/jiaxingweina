@@ -88,11 +88,10 @@ export function getEquCraftListByEquId(equId: string) {
 
 /**
  * 添加预约
- * todo 后端还没写
  */
 export function addOrder(addOrderRequest: AddOrderRequest) {
   return request({
-    url: "equipment/order/add",
+    url: "equipment/order/addOrder",
     method: "post",
     data: addOrderRequest
   })
@@ -146,7 +145,7 @@ export async function getOrdersByEquId(equId: string) {
  */
 export function updateOrder(updateOrderRequest: UpdateOrderRequest) {
   return request({
-    url: "equipment/updateOrder",
+    url: "equipment/updateOrderAdmin",
     method: "post",
     data: updateOrderRequest
   })

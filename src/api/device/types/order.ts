@@ -26,6 +26,7 @@ export interface AddOrderRequest {
   projectId: string
   startTime: string
   endTime: string
+  equipmentId: string
 }
 
 export interface UpdateOrderRequest {
@@ -34,4 +35,13 @@ export interface UpdateOrderRequest {
   projectId: string
   startTime: string
   endTime: string
+}
+
+export interface UpdateOrderRequest {
+  equipmentOrderId: string
+  equipmentId: string
+  projectId: string
+  startTime: string
+  endTime: string
+  userId: string
 }

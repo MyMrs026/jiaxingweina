@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { reactive, ref, watch } from "vue"
-import { addUser, deleteUser, updateUser, getUserListPage } from "@/api/user/index"
+import { addUser, deleteUser, updateUser, getUserListPage } from "@/api/user"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
 import { CirclePlus, Delete, RefreshRight } from "@element-plus/icons-vue"
 import { usePagination } from "@/hooks/usePagination"
@@ -55,6 +55,7 @@ const handleCreate = () => {
           username: formData.username,
           password: formData.password,
           gender: formData.gender,
+          userRole: formData.userRole,
           tel: formData.tel,
           email: formData.email,
           company: formData.company,
@@ -133,6 +134,7 @@ const handleUpdate = (row: User) => {
   formData.username = row.username
   formData.password = row.password
   formData.gender = row.gender
+  formData.userRole = row.userRole
   formData.tel = row.tel
   formData.email = row.email
   formData.company = row.company
@@ -256,6 +258,9 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
         </el-form-item>
         <el-form-item prop="email" label="邮箱">
           <el-input v-model="formData.email" placeholder="请输入" />
+        </el-form-item>
+        <el-form-item v-if="currentUpdateId !== undefined" prop="userRole" label="权限">
+          <el-input v-model="formData.userRole" placeholder="请输入" />
         </el-form-item>
         <el-form-item prop="company" label="公司">
           <el-input v-model="formData.company" placeholder="请输入" />
