@@ -179,6 +179,46 @@ export const constantRoutes: RouteRecordRaw[] = [
         }
       }
     ]
+  },
+  {
+    path: "/product",
+    name: "product",
+    component: Layouts,
+    redirect: "/product/products",
+    meta: {
+      title: "商品管理",
+      elIcon: "Menu",
+      alwaysShow: true
+    },
+    children: [
+      {
+        path: "products",
+        component: () => import("@/views/product/index.vue"),
+        name: "product",
+        meta: {
+          title: "商品列表",
+          keepAlive: true
+        }
+      },
+      {
+        path: "orders",
+        component: () => import("@/views/product/orders.vue"),
+        name: "orders",
+        meta: {
+          title: "订单列表",
+          keepAlive: true
+        }
+      },
+      {
+        path: "types",
+        component: () => import("@/views/product/types.vue"),
+        name: "types",
+        meta: {
+          title: "商品类型",
+          keepAlive: true
+        }
+      }
+    ]
   }
 ]
 
