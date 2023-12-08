@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { addProductType, deleteProductType, getProductTypeList, updateProductType } from "@/api/product"
-import { reactive, ref } from "vue"
+import { computed, reactive, ref } from "vue"
 import { ProductType } from "@/api/product/types/product"
 import { ElMessage, ElMessageBox, FormInstance, FormRules } from "element-plus"
 
@@ -85,15 +85,25 @@ const handleSubmit = () => {
     }
   })
 }
-
 getTableData()
+
+// 分页
+const currentPage = ref(1)
+const pageSize = ref(8)
+const currentPageData = computed(() => {
+  return tableData.value.slice((currentPage.value - 1) * pageSize.value, currentPage.value * pageSize.value)
+})
+
+const handleCurrentChange = (val: number) => {
+  currentPage.value = val
+}
 </script>
 
 <template>
   <div class="product-type">
-    <el-card>
+    <el-card class="table-card">
       <el-button type="primary" @click="handleAdd">添加</el-button>
-      <el-table class="table" :data="tableData" border>
+      <el-table class="table" :data="currentPageData" border>
         <el-table-column align="center" prop="productTypeId" label="分类id" />
         <el-table-column align="center" prop="productTypename" label="分类名" />
         <el-table-column align="center" prop="parentId" label="父分类id" />
@@ -104,16 +114,25 @@ getTableData()
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        class="pagination"
+        hide-on-single-page
+        layout="prev, pager, next"
+        :total="tableData.length"
+        :page-size="pageSize"
+        :current-page="currentPage"
+        @current-change="handleCurrentChange"
+      />
     </el-card>
     <el-dialog v-model="formVisible" :title="form.productTypeId ? '编辑' : '添加'" width="30%">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px" label-position="right">
-        <el-form-item v-if="form.productTypeId" label="分类id：">
+        <el-form-item v-if="form.productTypeId" label="分类id：" prop="productTypeId">
           <el-input v-model="form.productTypeId" placeholder="请输入分类id" />
         </el-form-item>
-        <el-form-item label="分类名：">
+        <el-form-item label="分类名：" prop="productTypename">
           <el-input v-model="form.productTypename" placeholder="请输入分类名" />
         </el-form-item>
-        <el-form-item label="父分类id：">
+        <el-form-item label="父分类id：" prop="parentId">
           <el-input v-model="form.parentId" placeholder="请输入父分类id" />
         </el-form-item>
       </el-form>
@@ -132,5 +151,16 @@ getTableData()
 
 .table {
   width: 50%;
+  margin-top: 20px;
+}
+
+.table-card {
+  height: 100%;
+  margin: 20px;
+}
+
+.pagination {
+  float: left;
+  margin-top: 20px;
 }
 </style>

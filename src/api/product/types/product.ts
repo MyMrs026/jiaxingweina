@@ -11,20 +11,8 @@ export interface Product {
   imgUrl: string
 }
 
-export interface AddProductRequest {
-  productName: string
-  price: number
-  unit: string
-  func: string
-  description: string
-  remark: string
-  productTypeId: string
-  stock: number
-  imgUrl: string
-}
-
 export interface ProductType {
-  productTypeId: string | null
+  productTypeId: string
   productTypename: string
   parentId: string
 }

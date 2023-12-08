@@ -67,7 +67,7 @@ export function addProduct(product: Product) {
 export function updateProduct(product: Product) {
   return request<ApiResponseData<Product>>({
     url: "/product/update",
-    method: "post",
+    method: "put",
     data: product
   })
 }
