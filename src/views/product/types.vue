@@ -107,7 +107,7 @@ const handleCurrentChange = (val: number) => {
         <el-table-column align="center" prop="productTypeId" label="分类id" />
         <el-table-column align="center" prop="productTypename" label="分类名" />
         <el-table-column align="center" prop="parentId" label="父分类id" />
-        <el-table-column align="center" label="操作">
+        <el-table-column align="center" label="操作" width="180">
           <template #default="{ row }">
             <el-button type="primary" @click="handleEdit(row)">编辑</el-button>
             <el-button type="danger" @click="handleDelete(row)">删除</el-button>
