@@ -10,7 +10,7 @@ import {
   deleteEquCraft
 } from "@/api/device"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
-import { CirclePlus, Delete, RefreshRight } from "@element-plus/icons-vue"
+import { CirclePlus, Delete, Plus, RefreshRight } from "@element-plus/icons-vue"
 import { usePagination } from "@/hooks/usePagination"
 import { Equipment } from "@/api/device/types/deviceList"
 import { EquCraft } from "@/api/device/types/deviceCraft"
@@ -73,13 +73,13 @@ const handleCreate = () => {
           })
       } else {
         updateEquipment({
-          advanceTime: formData.advanceTime || "",
+          advanceTime: formData.advanceTime,
           area: formData.area,
-          createTime: formData.createTime || "",
+          createTime: formData.createTime,
           documentUrl: formData.documentUrl,
           equipmentCategory: formData.equipmentCategory,
           equipmentFunction: formData.equipmentFunction,
-          equipmentId: formData.equipmentId || "",
+          equipmentId: formData.equipmentId,
           equipmentImageUrl: formData.equipmentImageUrl,
           equipmentName: formData.equipmentName,
           equipmentStatus: formData.equipmentStatus,
@@ -116,7 +116,7 @@ const handleDelete = (row: Equipment) => {
     cancelButtonText: "取消",
     type: "warning"
   }).then(() => {
-    deleteEquipment(row.equipmentId).then(() => {
+    deleteEquipment(row.equipmentId + "").then(() => {
       ElMessage.success("删除成功")
       getTableData()
     })
@@ -142,7 +142,7 @@ const deleteBatch = () => {
     })
       .then(() => {
         // Create an array of promises for delete operations
-        const deletePromises = selection.value.map((item) => deleteEquipment(item.equipmentId))
+        const deletePromises = selection.value.map((item) => deleteEquipment(item.equipmentId + ""))
 
         // Use Promise.all to wait for all delete operations to complete
         return Promise.all(deletePromises)
@@ -162,15 +162,15 @@ const deleteBatch = () => {
 //#region 改
 const currentUpdateId = ref<undefined | string>(undefined)
 const handleUpdate = (row: Equipment) => {
-  currentUpdateId.value = row.equipmentId
+  currentUpdateId.value = row.equipmentId + ""
 
-  formData.advanceTime = row.advanceTime || ""
+  formData.advanceTime = row.advanceTime
   formData.area = row.area
-  formData.createTime = row.createTime || ""
+  formData.createTime = row.createTime
   formData.documentUrl = row.documentUrl
   formData.equipmentCategory = row.equipmentCategory
   formData.equipmentFunction = row.equipmentFunction
-  formData.equipmentId = row.equipmentId || ""
+  formData.equipmentId = row.equipmentId
   formData.equipmentImageUrl = row.equipmentImageUrl
   formData.equipmentName = row.equipmentName
   formData.equipmentStatus = row.equipmentStatus
@@ -303,6 +303,10 @@ const toOrderPage = (row: Equipment) => {
   router.push("/device/" + equipmentId + "/orders")
 }
 
+const handleImgSuccess = (res: ApiResponseData<string>) => {
+  formData.equipmentImageUrl = res.data
+}
+
 /** 监听分页参数的变化 */
 watch([() => paginationData.currentPage, () => paginationData.pageSize], getTableData, { immediate: true })
 </script>
@@ -374,7 +378,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
     <!-- 新增/修改 -->
     <el-dialog
       v-model="dialogVisible"
-      :title="currentUpdateId === undefined ? '新增用户' : '修改用户'"
+      :title="currentUpdateId === undefined ? '新增设备' : '修改设备'"
       @close="resetForm"
       width="30%"
     >
@@ -399,6 +403,23 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
         </el-form-item>
         <el-form-item prop="equipmentId" label="设备id">
           <el-input v-model="formData.equipmentId" placeholder="请输入" />
+        </el-form-item>
+        <el-form-item label="设备图片上传">
+          <el-upload
+            class="avatar-uploader"
+            action="http://47.98.160.222:8080/api/file/uploadImage"
+            :on-success="handleImgSuccess"
+          >
+            <img
+              v-if="formData.equipmentImageUrl"
+              :src="formData.equipmentImageUrl"
+              class="img"
+              :alt="formData.equipmentImageUrl"
+            />
+            <i v-else class="avatar-uploader-icon">
+              <Plus class="plus" />
+            </i>
+          </el-upload>
         </el-form-item>
         <el-form-item prop="equipmentImageUrl" label="设备图片">
           <el-input v-model="formData.equipmentImageUrl" placeholder="请输入" />
@@ -473,6 +494,38 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
 </template>
 
 <style lang="scss" scoped>
+.avatar-uploader-icon {
+  font-size: 15px;
+  border: 1px dashed #3c3a3a;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.img {
+  width: 178px;
+  height: 178px;
+  border-radius: 6px;
+}
+
+.plus {
+  width: 15px;
+  height: 15px;
+}
+
+.app-container {
+  padding: 20px;
+}
+
+.table-header {
+  float: right;
+  margin-bottom: 10px;
+}
+
 .search-wrapper {
   margin-bottom: 20px;
 

@@ -51,7 +51,7 @@ export interface Equipment {
   documentUrl: string
   equipmentCategory: string
   equipmentFunction: string
-  equipmentId?: number
+  equipmentId: number
   equipmentImageUrl: string
   equipmentName: string
   equipmentStatus: number
